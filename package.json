@@ -1,0 +1,237 @@
+{
+  "name": "cody-assistant",
+  "displayName": "Cody - AI Coding Assistant",
+  "description": "Assistente de código local usando Ollama com deepseek-coder-v2:16b",
+  "version": "1.0.13",
+  "publisher": "cody",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facegalega-oss/cody-assisteat.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Machine Learning"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:cody-assistant.chat",
+    "onCommand:cody-assistant.editFile",
+    "onCommand:cody-assistant.explainCode",
+    "onCommand:cody-assistant.generateCode",
+    "onCommand:cody-assistant.createProject",
+    "onCommand:cody-assistant.createFile",
+    "onCommand:cody-assistant.analyzeProject",
+    "onCommand:cody-assistant.planProjectTask",
+    "onCommand:cody-assistant.continueProjectTask",
+    "onCommand:cody-assistant.switchModel",
+    "onCommand:cody-assistant.checkLocalVsixUpdate",
+    "onCommand:cody-assistant.clearChatHistory",
+    "onView:cody-assistant-view"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cody-assistant-sidebar",
+          "title": "Cody Assistant",
+          "icon": "media/cody-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "cody-assistant-sidebar": [
+        {
+          "id": "cody-assistant-view",
+          "name": "Cody Assistant",
+          "type": "webview",
+          "icon": "media/cody-icon.svg",
+          "contextualTitle": "Cody Assistant",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Cody Assistant",
+      "properties": {
+        "cody-assistant.ollamaHost": {
+          "type": "string",
+          "default": "http://127.0.0.1:11434",
+          "description": "Endereco do servidor Ollama usado pelo Cody."
+        },
+        "cody-assistant.model": {
+          "type": "string",
+          "default": "deepseek-coder:6.7b-instruct-q4_K_M",
+          "description": "Modelo padrao usado nas conversas e comandos do Cody."
+        },
+        "cody-assistant.systemPrompt": {
+          "type": "string",
+          "default": "Voce e Cody, um assistente profissional de programacao. Forneca respostas precisas, praticas e objetivas, com foco em codigo correto, arquitetura limpa, depuracao e produtividade no VS Code. Quando a tarefa envolver frontend, interface ou CSS, proponha solucoes com direcao visual forte, responsividade real e acabamento profissional, evitando layouts genericos.",
+          "markdownDescription": "Prompt de sistema enviado antes de cada conversa com o Ollama."
+        },
+        "cody-assistant.temperature": {
+          "type": "number",
+          "default": 0.3,
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Temperatura usada nas respostas do modelo."
+        },
+        "cody-assistant.maxTokens": {
+          "type": "number",
+          "default": 2200,
+          "minimum": 1,
+          "description": "Limite de tokens previsto para cada resposta."
+        },
+        "cody-assistant.keepAliveMinutes": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "Mantem o modelo aquecido no Ollama por alguns minutos para acelerar respostas seguintes. Use 0 para desativar."
+        },
+        "cody-assistant.requestTimeoutMs": {
+          "type": "number",
+          "default": 600000,
+          "minimum": 0,
+          "description": "Tempo maximo de espera por resposta do Ollama em milissegundos. Use 0 para desativar o timeout."
+        },
+        "cody-assistant.autoUpdateFromLocalVsix": {
+          "type": "boolean",
+          "default": true,
+          "description": "Permite ao Cody procurar atualizacoes em arquivos VSIX locais."
+        },
+        "cody-assistant.localVsixUpdateDirectory": {
+          "type": "string",
+          "default": "d:/cody-assistant/update",
+          "description": "Pasta usada para procurar arquivos cody-assistant-*.vsix. Se ficar vazia, o Cody usa a primeira pasta aberta no workspace."
+        },
+        "cody-assistant.autoInstallLocalVsixUpdates": {
+          "type": "boolean",
+          "default": false,
+          "description": "Instala automaticamente a atualizacao VSIX detectada. Se desativado, o Cody apenas avisa e pede confirmacao."
+        },
+        "cody-assistant.vsixUpdateCheckMode": {
+          "type": "string",
+          "enum": [
+            "startup",
+            "startupAndWatch"
+          ],
+          "default": "startup",
+          "description": "Define se o Cody verifica atualizacoes de VSIX apenas ao iniciar o VS Code ou se tambem observa a pasta local durante a sessao."
+        },
+        "cody-assistant.githubReleaseApiUrl": {
+          "type": "string",
+          "default": "https://api.github.com/repos/facegalega-oss/cody-assisteat/releases/latest",
+          "description": "URL remota do GitHub usada para atualizacao. Aceita releases e tambem pasta do repositorio, como https://github.com/OWNER/REPO/releases/latest, https://api.github.com/repos/OWNER/REPO/releases/latest ou https://github.com/OWNER/REPO/tree/main/releases/latest."
+        },
+        "cody-assistant.githubReleaseVsixAssetPattern": {
+          "type": "string",
+          "default": "cody-assistant-*.vsix",
+          "description": "Padrao do nome do asset VSIX esperado na release do GitHub."
+        },
+        "cody-assistant.checkConnectionOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Verifica a conexao com o Ollama quando a extensao ativa."
+        },
+        "cody-assistant.showStartupNotifications": {
+          "type": "boolean",
+          "default": false,
+          "description": "Mostra notificacoes de conexao do Ollama durante a inicializacao."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "cody-assistant.chat",
+        "title": "Cody: Open Assistant"
+      },
+      {
+        "command": "cody-assistant.editFile",
+        "title": "Cody: Edit Selected Code"
+      },
+      {
+        "command": "cody-assistant.explainCode",
+        "title": "Cody: Explain Selected Code"
+      },
+      {
+        "command": "cody-assistant.generateCode",
+        "title": "Cody: Generate Code"
+      },
+      {
+        "command": "cody-assistant.createProject",
+        "title": "Cody: Create Project Structure"
+      },
+      {
+        "command": "cody-assistant.createFile",
+        "title": "Cody: Create New File"
+      },
+      {
+        "command": "cody-assistant.analyzeProject",
+        "title": "Cody: Analyze Current Project"
+      },
+      {
+        "command": "cody-assistant.planProjectTask",
+        "title": "Cody: Plan And Apply Project Change"
+      },
+      {
+        "command": "cody-assistant.continueProjectTask",
+        "title": "Cody: Continue Active Task"
+      },
+      {
+        "command": "cody-assistant.switchModel",
+        "title": "Cody: Switch Model"
+      },
+      {
+        "command": "cody-assistant.checkLocalVsixUpdate",
+        "title": "Cody: Check VSIX Update"
+      },
+      {
+        "command": "cody-assistant.clearChatHistory",
+        "title": "Cody: Clear Chat History"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "cody-assistant.chat",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c"
+      },
+      {
+        "command": "cody-assistant.createProject",
+        "key": "ctrl+shift+n",
+        "mac": "cmd+shift+n"
+      },
+      {
+        "command": "cody-assistant.createFile",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "typecheck": "tsc -p ./ --noEmit",
+    "bundle": "node ./scripts/build.mjs",
+    "compile": "npm run typecheck && npm run bundle",
+    "watch": "node ./scripts/build.mjs --watch",
+    "package": "vsce package",
+    "package:local-update": "node ./scripts/release.mjs current",
+    "release:patch": "node ./scripts/release.mjs patch",
+    "release:minor": "node ./scripts/release.mjs minor",
+    "release:major": "node ./scripts/release.mjs major"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.28.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "ollama": "^0.5.0",
+    "undici": "^7.16.0"
+  }
+}

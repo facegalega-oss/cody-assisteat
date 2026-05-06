@@ -1,13 +1,15 @@
 # Cody Assistant
 
-Extensao VS Code para assistencia local de codigo usando Ollama.
+Extensao do VS Code para assistencia de programacao com Ollama, chat persistente, contexto automatico do projeto e fluxo seguro de alteracoes com preview.
+
+Versao atual: `1.0.13`
 
 ## Requisitos
 
 - VS Code
 - Node.js
-- Ollama rodando em `http://127.0.0.1:11434`
-- Modelo atual esperado: `deepseek-coder-v2:16b`
+- Ollama ativo em `http://127.0.0.1:11434`
+- Modelo padrao atual: `deepseek-coder:6.7b-instruct-q4_K_M`
 
 ## Instalar dependencias
 
@@ -15,108 +17,157 @@ Extensao VS Code para assistencia local de codigo usando Ollama.
 npm install
 ```
 
-Se o PowerShell bloquear `npm`, use:
+Se o PowerShell bloquear `npm`, use os executaveis `.cmd` diretamente.
 
-```powershell
-.\node_modules\.bin\tsc.cmd -v
-```
+## Build
 
-## Compilar a extensao
+Build atual:
 
-```powershell
-cd d:\cody-assistant
-.\node_modules\.bin\tsc.cmd -p ./
-```
+- `npm run typecheck`
+- `npm run bundle`
+- `npm run compile`
 
-O TypeScript compilado vai para a pasta `out/`.
+O `compile` executa `typecheck + bundle` e gera `out/extension.js`.
 
 ## Testar no VS Code
 
-O jeito mais rapido de testar e abrir o projeto no VS Code e pressionar `F5`.
+Abra o projeto no VS Code e pressione `F5`.
 
-Isso abre uma nova janela `Extension Development Host` com a extensao carregada.
+O host de desenvolvimento abre com a extensao carregada e o build e executado antes do startup.
 
-Agora o `F5` executa o build antes de iniciar o host de desenvolvimento.
-
-## Gerar o VSIX
+## Gerar VSIX
 
 ```powershell
 npx vsce package
 ```
 
-Se `npx` estiver bloqueado:
+Se preferir:
 
 ```powershell
-.\node_modules\.bin\vsce.cmd package
+npm run package
 ```
 
 Isso gera um arquivo como:
 
 ```text
-cody-assistant-0.0.20.vsix
+cody-assistant-1.0.13.vsix
 ```
 
-O script `vscode:prepublish` executa o build antes do empacotamento, entao a pasta `out/` vai junto no VSIX.
+## Scripts de release
 
-Para testar a autoatualizacao local do Cody, voce tambem pode gerar o pacote mais novo exatamente na pasta observada pela extensao:
+- `npm run package`: empacota o VSIX
+- `npm run package:local-update`: gera o VSIX da versao atual para teste de update
+- `npm run release:patch`
+- `npm run release:minor`
+- `npm run release:major`
 
-```powershell
-npx.cmd vsce package --out .\cody-assistant-0.0.20.vsix
-```
+Os scripts de release automatizam:
 
-Ou, se preferir, usar o script do projeto:
-
-```powershell
-npm.cmd run package:local-update
-```
+- bump de versao
+- build
+- empacotamento do VSIX
+- sincronizacao das referencias de versao no projeto
 
 ## Instalar no VS Code
 
 1. Abra o VS Code.
 2. Execute `Extensions: Install from VSIX...`
-3. Selecione o arquivo `.vsix`
-4. Recarregue a janela quando o VS Code pedir
+3. Selecione o arquivo `.vsix`.
+4. Recarregue a janela.
 
-Depois disso, a extensao instalada pode ativar automaticamente no startup do VS Code.
+## Comandos principais
 
-## Como abrir o Cody
+- `Cody: Open Assistant`
+- `Cody: Explain Selected Code`
+- `Cody: Edit Selected Code`
+- `Cody: Generate Code`
+- `Cody: Create Project Structure`
+- `Cody: Create New File`
+- `Cody: Analyze Current Project`
+- `Cody: Plan And Apply Project Change`
+- `Cody: Continue Active Task`
+- `Cody: Switch Model`
+- `Cody: Check VSIX Update`
+- `Cody: Clear Chat History`
 
-- Comando: `Cody: Open Assistant`
-- Atalho atual: `Ctrl+Shift+C`
+Atalhos atuais:
 
-Se a extensao estiver instalada corretamente, `Ctrl+Shift+C` tambem pode ativar a extensao e abrir a sidebar do Cody.
+- `Ctrl+Shift+C`: abrir o Cody
+- `Ctrl+Shift+N`: criar projeto
+- `Ctrl+Shift+F`: criar arquivo
 
-O comando `Cody: Explain Selected Code` agora envia a selecao atual para o chat com contexto do arquivo e da linguagem.
+## O que o Cody ja faz
 
-O comando `Cody: Edit Selected Code` agora abre um diff de revisao antes de aplicar a alteracao no arquivo.
+- chat na sidebar com multiplas conversas por workspace
+- historico persistente por conversa
+- roteamento de intencao no chat
+- contexto automatico do editor e do workspace
+- explicacao de codigo selecionado
+- edicao com diff antes de aplicar
+- geracao de codigo
+- criacao de arquivos
+- criacao de estrutura de projeto com preview
+- analise de projeto com leitura de contexto real
+- planejamento e aplicacao de mudancas por arquivo
+- tarefa ativa persistente por conversa, com objetivo, plano e progresso
+- continuacao de tarefa sem precisar repetir todo o contexto
+- analise de projeto mais exigente contra recomendacoes vagas ou superficiais
+- troca rapida de modelo do Ollama
+- atualizacao da extensao por VSIX local ou remoto
+- streaming de respostas no chat para reduzir a sensacao de espera
+- sanitizacao forte das respostas antes de aplicar conteudo em arquivos
+- prompts reforcados para frontend, CSS, JS e interfaces mais modernas
+- template React inicial com direcao visual mais forte e responsividade melhor
+- fallback para resposta normal quando o stream do Ollama falhar antes do primeiro chunk
+- persistencia do historico corrigida para manter mensagens do usuario e do assistente entre saves e reaberturas
+- rascunho parcial da resposta do assistente salvo durante streaming para reduzir perda de historico em respostas longas
+- revisao de alteracao da selecao com diff resumido e confirmacao diretamente no chat
+- compatibilidade melhor com URLs antigas e novas de update remoto no GitHub
+- fallback pela pagina publica da release quando a API do GitHub responder 403
 
-O chat agora persiste historico por workspace, restaura a conversa quando voce reabre o VS Code e usa mensagens recentes como contexto real para respostas seguintes.
+## Continuidade de Tarefa
 
-Agora esse historico foi evoluido para multiplas conversas: voce pode abrir um `Novo chat`, alternar entre conversas pela lista lateral e cada conversa assume seu proprio contexto e memoria.
+O Cody agora pode manter uma tarefa ativa por conversa.
 
-Voce tambem pode limpar a conversa ativa pelo botao `Limpar chat` na sidebar ou pelo comando `Cody: Clear Chat History`.
+Isso significa que ele guarda:
 
-No chat geral da sidebar, o Cody agora tambem injeta contexto automatico do editor e do workspace, incluindo arquivo ativo, linguagem, selecao ou trecho proximo ao cursor, e arquivos relevantes como `package.json`, `README.md` e configs do projeto.
+- objetivo principal da melhoria
+- ultimo plano gerado
+- status atual da tarefa
+- progresso por etapa/arquivo
 
-O chat agora tambem entende intencao. Em vez de depender sempre dos comandos manuais, voce ja pode escrever pedidos como "analise este projeto", "quero adicionar autenticacao", "crie um arquivo" ou "explique este codigo", e o Cody tenta encaminhar automaticamente para o fluxo certo: conversa normal, analise profunda, explicacao da selecao atual, edicao segura da selecao, criacao guiada de arquivo, criacao guiada de projeto ou planejamento de mudanca no projeto.
+Fluxo recomendado:
 
-Esse roteamento ficou mais confiavel: a sidebar mostra o modo detectado para a conversa ativa e, antes de executar um fluxo estruturado, o Cody abre uma confirmacao curta para voce manter o modo sugerido ou corrigir para outro.
+1. use `Cody: Plan And Apply Project Change` ou peça uma mudanca no chat
+2. deixe o Cody montar e executar o plano
+3. depois, use `Cody: Continue Active Task` ou diga no chat algo como `continue a tarefa`
 
-Na criacao de projetos, stacks conhecidas agora usam templates base mais confiaveis, projetos `Custom` passam por validacao forte de estrutura, e existe preview antes de criar pastas e arquivos no disco.
+Com isso, o Cody tenta retomar a execucao com base no objetivo e no progresso salvos, sem depender de voce reexplicar tudo.
 
-O comando `Cody: Analyze Current Project` agora faz uma leitura bem mais forte: ele considera a arvore do workspace, arquivos reais importantes, sinais locais de maturidade do projeto, stack detectada, presenca de testes/lint/CI e devolve uma analise estruturada com recomendacoes de alto impacto, roadmap e melhor proximo passo.
+## Atualizacao da extensao
 
-O novo comando `Cody: Plan And Apply Project Change` leva o Cody para um fluxo mais profissional de evolucao do projeto: voce descreve a melhoria desejada, ele monta um plano estruturado por arquivo, mostra um preview do plano e executa passo a passo com diff antes de aplicar cada mudanca.
+O sistema de update fica em [src/update/vsixUpdater.ts](D:/cody-assistant/src/update/vsixUpdater.ts:1).
 
-Voce tambem pode trocar rapidamente o modelo usado pelo Cody com `Cody: Switch Model` ou pelo botao `Trocar modelo` na sidebar. O comando lista os modelos instalados no Ollama e salva a escolha no workspace atual.
+Fontes suportadas:
 
-O Cody agora tambem consegue procurar automaticamente um `cody-assistant-*.vsix` local mais novo, instalar essa atualizacao e pedir apenas o reload da janela. Isso vale tanto para versoes realmente novas quanto para reinstalar a mesma versao quando um novo VSIX for gerado na pasta observada.
+- VSIX local
+- GitHub Releases
+- pasta do repositorio via GitHub Contents API
 
-Se quiser disparar essa verificacao manualmente, use `Cody: Check Local VSIX Update`.
+Comportamento atual:
+
+- `startup`: verifica atualizacao ao iniciar o VS Code
+- `startupAndWatch`: verifica no startup e observa a pasta local durante a sessao
+- `Cody: Check VSIX Update`: permite forcar uma checagem manual
+
+Importante:
+
+- checagem automatica no startup so sugere update quando encontra versao maior
+- reinstalacao da mesma versao fica reservada para a checagem manual
 
 ## Configuracoes
 
-Nas configuracoes do VS Code, voce pode ajustar:
+Configuracoes principais do Cody:
 
 - `cody-assistant.ollamaHost`
 - `cody-assistant.model`
@@ -128,56 +179,72 @@ Nas configuracoes do VS Code, voce pode ajustar:
 - `cody-assistant.autoUpdateFromLocalVsix`
 - `cody-assistant.localVsixUpdateDirectory`
 - `cody-assistant.autoInstallLocalVsixUpdates`
+- `cody-assistant.vsixUpdateCheckMode`
+- `cody-assistant.githubReleaseApiUrl`
+- `cody-assistant.githubReleaseVsixAssetPattern`
 - `cody-assistant.checkConnectionOnStartup`
 - `cody-assistant.showStartupNotifications`
 
-Se o Ollama estiver online mas o Cody mostrar `fetch failed`, prefira configurar `cody-assistant.ollamaHost` como `http://127.0.0.1:11434`. Nesta versao o cliente tambem tenta esse fallback automaticamente quando `localhost` falha.
+Defaults atuais relevantes:
 
-Para respostas mais rapidas, o Cody agora usa um limite de tokens mais enxuto por padrao e mantem o modelo aquecido no Ollama por alguns minutos. Se quiser priorizar ainda mais velocidade, reduza `cody-assistant.maxTokens` e mantenha `cody-assistant.keepAliveMinutes` acima de `0`.
+- `cody-assistant.autoUpdateFromLocalVsix = true`
+- `cody-assistant.localVsixUpdateDirectory = "d:/cody-assistant/update"`
+- `cody-assistant.autoInstallLocalVsixUpdates = false`
+- `cody-assistant.vsixUpdateCheckMode = "startup"`
+- `cody-assistant.githubReleaseApiUrl = "https://github.com/facegalega-oss/cody-assisteat/releases/latest"`
 
-Se aparecer `Headers Timeout Error`, aumente `cody-assistant.requestTimeoutMs`. O Cody agora usa um `fetch` proprio com timeouts mais adequados para modelos locais pesados, mas maquinas mais lentas ou modelos grandes ainda podem precisar de um limite maior. Se preferir, voce tambem pode definir `cody-assistant.requestTimeoutMs = 0` para desativar o timeout.
+Exemplos validos para `githubReleaseApiUrl`:
 
-Analise de projeto e planejamento de mudancas agora usam automaticamente um timeout maior do que o chat comum, porque esses fluxos enviam mais contexto e naturalmente demoram mais para modelos grandes.
+```text
+https://github.com/OWNER/REPO/releases/latest
+https://api.github.com/repos/OWNER/REPO/releases/latest
+https://github.com/OWNER/REPO/tree/main/releases/latest
+https://api.github.com/repos/OWNER/REPO/contents/releases/latest?ref=main
+```
 
-Para autoatualizacao local, deixe `cody-assistant.autoUpdateFromLocalVsix = true`. Se `cody-assistant.localVsixUpdateDirectory` estiver vazio, o Cody usa a primeira pasta aberta no workspace e observa novos arquivos `cody-assistant-*.vsix`. Se preferir, voce pode apontar para uma pasta absoluta fixa onde seus pacotes sao gerados.
+O updater agora tambem reconhece formatos antigos que acabavam apontando `releases/latest` como pasta do repositorio e converte isso para a release correta quando necessario.
 
-No seu caso atual, se o workspace aberto for `D:\cody-assistant` e `cody-assistant.localVsixUpdateDirectory` estiver vazio, o arquivo novo precisa ficar em `D:\cody-assistant`. Entao o teste ideal e simples:
+## Observacoes sobre desempenho
 
-1. deixar a versao `0.0.19` instalada no VS Code
-2. abrir o workspace `D:\cody-assistant`
-3. gerar `D:\cody-assistant\cody-assistant-0.0.20.vsix`
-4. esperar a deteccao automatica ou rodar `Cody: Check Local VSIX Update`
+- o Cody usa `keepAliveMinutes` para manter o modelo aquecido
+- `Analyze Current Project` e `Plan And Apply Project Change` usam timeouts maiores do que o chat comum
+- `requestTimeoutMs = 0` desativa o timeout do lado da extensao
+- o chat agora renderiza a resposta do Ollama em streaming, exibindo o texto aos poucos em vez de esperar a resposta completa
 
-Se quiser observar outra pasta, configure `cody-assistant.localVsixUpdateDirectory` com esse caminho.
-
-Se quiser apenas ser avisado antes de instalar, defina `cody-assistant.autoInstallLocalVsixUpdates = false`.
-
-## Sobre a inicializacao automatica
-
-O comportamento esperado agora e:
-
-- a extensao ativa ao finalizar o startup do VS Code
-- a extensao tambem ativa ao abrir a view do Cody
-- a extensao tambem ativa ao executar `Cody: Open Assistant`
-
-Para isso funcionar fora do `F5`, a extensao precisa estar compilada e instalada no VS Code.
-
-## Estrutura atual
+## Estrutura do projeto
 
 ```text
 src/
   chat/
+    webview/
   commands/
   core/
   ollama/
   project/
+  update/
   extension.ts
+scripts/
+  build.mjs
+  release.mjs
+docs/
+  analise_inicial.md
+  continuidade.md
 ```
 
 ## Arquivos principais
 
-- `src/extension.ts`: ponto de entrada
-- `src/chat/chatViewProvider.ts`: webview do chat
-- `src/commands/registerCommands.ts`: registro dos comandos
-- `src/ollama/client.ts`: cliente Ollama
-- `src/project/projectTools.ts`: criacao e analise de projeto
+- [src/extension.ts](D:/cody-assistant/src/extension.ts:1): ativacao da extensao
+- [src/chat/chatViewProvider.ts](D:/cody-assistant/src/chat/chatViewProvider.ts:1): fluxo da sidebar e conversas
+- [src/chat/webview/chatHtml.ts](D:/cody-assistant/src/chat/webview/chatHtml.ts:1): HTML da webview
+- [src/chat/webview/chatStyles.ts](D:/cody-assistant/src/chat/webview/chatStyles.ts:1): estilos da webview
+- [src/chat/webview/chatScript.ts](D:/cody-assistant/src/chat/webview/chatScript.ts:1): logica da webview
+- [src/commands/registerCommands.ts](D:/cody-assistant/src/commands/registerCommands.ts:1): comandos da extensao
+- [src/ollama/client.ts](D:/cody-assistant/src/ollama/client.ts:1): cliente do Ollama
+- [src/project/projectTools.ts](D:/cody-assistant/src/project/projectTools.ts:1): criacao e analise de projeto
+- [src/project/projectTaskFlow.ts](D:/cody-assistant/src/project/projectTaskFlow.ts:1): plano e execucao de mudancas
+- [src/update/vsixUpdater.ts](D:/cody-assistant/src/update/vsixUpdater.ts:1): autoatualizacao
+- [docs/continuidade.md](D:/cody-assistant/docs/continuidade.md:1): resumo vivo do estado atual do projeto
+
+## Continuidade
+
+Use [docs/continuidade.md](D:/cody-assistant/docs/continuidade.md:1) como referencia rapida para retomar o projeto em novas conversas.
